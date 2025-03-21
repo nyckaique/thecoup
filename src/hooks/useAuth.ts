@@ -1,19 +1,21 @@
 import { useEffect, useState } from "react";
-import { getAuth, onAuthStateChanged, User } from "firebase/auth";
-
+import { onAuthStateChanged, signInAnonymously, User } from "firebase/auth";
+import { auth } from "../services/firebase";
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true); // Adicione este estado
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false); // Autenticação carregada
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (!firebaseUser) {
+        await signInAnonymously(auth);
+      }
+      setUser(firebaseUser);
+      setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => unsubscribe(); // Cleanup ao desmontar
   }, []);
 
-  return { user, loading }; // Retorne ambos
+  return { user, loading };
 }

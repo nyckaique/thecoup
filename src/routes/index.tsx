@@ -1,14 +1,14 @@
 import { Routes, Route } from "react-router-dom";
 import Home from "../pages/Home";
-import SalaEspera from "../pages/SalaEspera";
-import SalaJogo from "../pages/SalaJogo";
-import ProtectedRoute from "./ProtectedRoute";
+// import SalaEspera from "../pages/SalaEspera";
+// import SalaJogo from "../pages/SalaJogo";
+// import ProtectedRoute from "./ProtectedRoute";
 
 function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route
+      {/* <Route
         path="/sala/:id"
         element={
           <ProtectedRoute>
@@ -23,7 +23,7 @@ function AppRoutes() {
             <SalaJogo />
           </ProtectedRoute>
         }
-      />
+      /> */}
     </Routes>
   );
 }
