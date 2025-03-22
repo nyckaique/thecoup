@@ -27,6 +27,8 @@ export function useCriarSala() {
       criador: user.uid,
       status: "aguardando",
       createdAt: serverTimestamp(),
+      inicioPartida: null,
+      contagemAtiva: false,
     };
 
     const docRef = await addDoc(collection(db, "salas"), salaNova);

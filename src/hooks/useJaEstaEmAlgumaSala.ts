@@ -11,7 +11,6 @@ export function useJaEstaEmAlgumaSala() {
     // Verifica se o usuário já está em uma sala
     const salasRef = collection(db, "salas");
     const salasSnapshot = await getDocs(salasRef);
-
     for (const doc of salasSnapshot.docs) {
       const sala = doc.data() as Sala;
       // Verifica se o usuário já está na sala e se o status não é "encerrada"
@@ -19,8 +18,8 @@ export function useJaEstaEmAlgumaSala() {
         sala.jogadores.some((jogador) => jogador.uid === user.uid) &&
         sala.status !== "encerrada"
       ) {
-        alert("Você já está em uma sala.");
         navigate(`/sala/${sala.id}`);
+        alert("Você já está em uma sala.");
         return true; // Retorna true assim que encontrar a sala em que o usuário está
       }
     }
