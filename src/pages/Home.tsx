@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useCriarSala } from "../hooks/useCriarSala";
 import { useAcessarSala } from "../hooks/useAcessarSala";
 import { useValidarNome } from "../hooks/useValidarNome";
 import { useValidarCodigo } from "../hooks/useValidarCodigo";
@@ -10,7 +9,6 @@ export default function Home() {
   const [nome, setNome] = useState("");
   const [codigo, setCodigo] = useState("");
 
-  const criarSala = useCriarSala();
   const acessarSala = useAcessarSala();
   const validarNome = useValidarNome();
   const validarCodigo = useValidarCodigo();
@@ -76,8 +74,7 @@ export default function Home() {
     if (await jaEstaEmAlgumaSala(user)) {
       return;
     }
-    const sala = await criarSala(user, true);
-    await acessarSala(nome, user, true, sala.codigo);
+    await acessarSala(nome, user, true);
   };
 
   // LER REGRAS
