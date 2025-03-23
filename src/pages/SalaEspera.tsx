@@ -17,7 +17,7 @@ export default function SalaEspera() {
   const removerJogador = useRemoverJogador(sala);
   const toggleEstouPronto = useToggleEstouPronto(sala);
   const iniciarPartida = useIniciarPartida();
-  const sairSala = useSairSala();
+  const sairSala = useSairSala(sala!);
   // Fica verificando se foi removido da sala
   useVerificarRemocao();
 
@@ -35,6 +35,11 @@ export default function SalaEspera() {
 
   const handleSairSala = (user: User, ehDono: boolean) => {
     sairSala(user, ehDono);
+  };
+
+  // LER REGRAS
+  const handleLerRegras = () => {
+    alert(`Estou lendo as regras`);
   };
 
   if (!sala) {
@@ -64,7 +69,7 @@ export default function SalaEspera() {
               <p>
                 {jogadorEhDono && <span>Líder</span>} {jogador.nome}{" "}
                 <span>{jogador.ready ? "Pronto" : "Aguardando"}</span>{" "}
-                {ehDono && (
+                {ehDono && jogador.uid !== user!.uid && (
                   <button onClick={() => handleRemoverJogador(jogador.uid)}>
                     Remover jogador
                   </button>
@@ -87,6 +92,8 @@ export default function SalaEspera() {
           <br />
         </>
       )}
+      <button onClick={() => handleLerRegras()}>Ler Regras</button>
+      <br />
       <button onClick={() => handleSairSala(user!, ehDono)}>
         Sair da sala
       </button>
