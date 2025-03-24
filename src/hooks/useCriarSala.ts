@@ -22,7 +22,6 @@ export function useCriarSala() {
       createdAt: serverTimestamp(),
       criador: user.uid,
       id: "a",
-      //inicioPartida: null,
       jogadores: [],
       privada,
       status: "aguardando",

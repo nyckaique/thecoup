@@ -6,7 +6,7 @@ import { Jogo } from "../types/jogo";
 export function useIniciarPartida() {
   const iniciarPartida = async (sala: Sala) => {
     const salaRef = doc(db, "salas", sala.id);
-    if (sala.jogadores.length < 2) {
+    if (sala.jogadores.length < 3) {
       alert("Não há jogadores suficientes para iniciar a partida.");
       return;
     }

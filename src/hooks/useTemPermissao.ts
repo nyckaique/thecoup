@@ -25,11 +25,11 @@ export function useTemPermissao() {
 
       if (jogoDoc.exists()) {
         const jogadores = jogoDoc.data().jogadores; // Lista de jogadores do jogo
-        const usuarioEstaNaSala: boolean = jogadores.some(
+        const usuarioEstaNoJogo: boolean = jogadores.some(
           (jogador: Jogador) => jogador.uid === user.uid
         );
-        console.log(usuarioEstaNaSala);
-        return usuarioEstaNaSala; // Retorna true se o usuário estiver na lista
+        console.log(usuarioEstaNoJogo);
+        return usuarioEstaNoJogo; // Retorna true se o usuário estiver na lista
       }
 
       // Se não encontrar nem sala nem jogo, retorna false

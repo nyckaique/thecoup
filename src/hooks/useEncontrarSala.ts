@@ -35,7 +35,7 @@ export function useEncontrarSala() {
         const salaEncontrada = doc.data() as Sala;
 
         // Verifica se a sala tem vagas
-        if (salaEncontrada.jogadores.length < 8) {
+        if (salaEncontrada.jogadores.length < 11) {
           // Sala com vaga disponível, retorna ela
           return { ...salaEncontrada };
         }

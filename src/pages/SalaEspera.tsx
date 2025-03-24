@@ -22,7 +22,7 @@ export default function SalaEspera() {
   const sairSala = useSairSala(sala!);
   const navigate = useNavigate();
 
-  // Adicione este hook para monitorar o início do jogo
+  // Fica verificando o início do jogo
   useVerificarInicioJogo(sala);
 
   // Fica verificando se foi removido da sala
@@ -61,7 +61,7 @@ export default function SalaEspera() {
       {/* Titulo da sala */}
       <h1>Sala de Espera</h1>
       {/* Quantidade de jogadores */}
-      <h5>{sala.jogadores.length} / 8 Jogadores</h5>
+      <h5>{sala.jogadores.length} / 10 Jogadores</h5>
       {/* Código */}
       {sala.codigo && (
         <h6>
