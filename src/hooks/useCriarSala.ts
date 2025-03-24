@@ -18,15 +18,15 @@ export function useCriarSala() {
     const codigo = privada ? criarCodigo() : null; // Se privada, gera um código
 
     const salaNova: Sala = {
-      id: "a",
       codigo: codigo,
+      createdAt: serverTimestamp(),
+      criador: user.uid,
+      id: "a",
+      //inicioPartida: null,
       jogadores: [],
       privada,
-      criador: user.uid,
       status: "aguardando",
-      createdAt: serverTimestamp(),
-      inicioPartida: null,
-      contagemAtiva: false,
+      jogoId: "a",
     };
 
     const docRef = await addDoc(collection(db, "salas"), salaNova);
