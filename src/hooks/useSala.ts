@@ -3,10 +3,14 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../services/firebase";
 import { Sala } from "../types/sala";
 
-export function useSala(salaId: string) {
+export function useSala(salaId: string | null) {
   const [sala, setSala] = useState<Sala | null>(null);
 
   useEffect(() => {
+    if (!salaId) {
+      setSala(null);
+      return;
+    }
     const salaRef = doc(db, "salas", salaId);
     // Escuta mudanças no Firestore em tempo real
     const unsubscribe = onSnapshot(salaRef, (snapshot) => {

@@ -8,9 +8,9 @@ export function useJogo(jogoId: string) {
 
   useEffect(() => {
     const jogoRef = doc(db, "jogos", jogoId);
-    const unsubscribe = onSnapshot(jogoRef, (doc) => {
-      if (doc.exists()) {
-        setJogo({ id: doc.id, ...doc.data() } as Jogo);
+    const unsubscribe = onSnapshot(jogoRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setJogo({ ...snapshot.data() } as Jogo);
       } else {
         setJogo(null);
       }

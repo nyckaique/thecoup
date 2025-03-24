@@ -1,7 +1,7 @@
 import { useEhDonoDaSala } from "../hooks/useEhDonoDaSala";
 import { useSala } from "../hooks/useSala";
 import { useAuth } from "../hooks/useAuth";
-import { useRemoverJogador } from "../hooks/useRemoverJogador";
+import { useRemoverJogadorSala } from "../hooks/useRemoverJogadorSala";
 import { useToggleEstouPronto } from "../hooks/useToggleEstouPronto";
 import { useIniciarPartida } from "../hooks/useIniciarPartida";
 import { useSairSala } from "../hooks/useSairSala";
@@ -16,7 +16,7 @@ export default function SalaEspera() {
   const sala = useSala(id!);
   const { user } = useAuth();
   const ehDono = useEhDonoDaSala(sala, user);
-  const removerJogador = useRemoverJogador(sala);
+  const removerJogadorSala = useRemoverJogadorSala();
   const toggleEstouPronto = useToggleEstouPronto(sala);
   const iniciarPartida = useIniciarPartida();
   const sairSala = useSairSala(sala!);
@@ -28,8 +28,8 @@ export default function SalaEspera() {
   // Fica verificando se foi removido da sala
   useVerificarRemocao();
 
-  const handleRemoverJogador = (uid: string) => {
-    removerJogador(uid);
+  const handleRemoverJogadorSala = (uid: string) => {
+    removerJogadorSala(sala!.id, uid);
   };
 
   const handleToggleEstouPronto = (user: User) => {
@@ -84,7 +84,7 @@ export default function SalaEspera() {
                 {jogadorEhDono && <span>Líder</span>} {jogador.nome}{" "}
                 <span>{jogador.ready ? "Pronto" : "Aguardando"}</span>{" "}
                 {ehDono && jogador.uid !== user!.uid && (
-                  <button onClick={() => handleRemoverJogador(jogador.uid)}>
+                  <button onClick={() => handleRemoverJogadorSala(jogador.uid)}>
                     Remover jogador
                   </button>
                 )}
