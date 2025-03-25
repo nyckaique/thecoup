@@ -1,0 +1,1 @@
+export type NomeCarta = 'Assassino' | 'Capitão' | 'Condessa' | 'Duque' | 'Inquisidor';

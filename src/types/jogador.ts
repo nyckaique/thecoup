@@ -1,5 +1,5 @@
-export interface Jogador {
-  uid: string;
-  nome: string;
-  ready: boolean;
-}
+  export interface Jogador {
+    uid: string;
+    nome: string;
+    ready: boolean;
+  }
