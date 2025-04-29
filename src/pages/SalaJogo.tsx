@@ -8,6 +8,8 @@ import { Acao } from "../types/acao";
 import { Influencia } from "../types/influencia";
 import { JogadorInGame } from "../types/jogadorInGame";
 import { Jogo } from "../types/jogo";
+import { executarAcao, finalizarTurno } from "../lib/game/actions/gameActions";
+import { useEffect, useState } from "react";
 
 export default function JogoScreen() {
   const { id } = useParams();
@@ -17,21 +19,48 @@ export default function JogoScreen() {
   const ehDono = useEhDonoDaSala(sala, user);
   const sairJogo = useSairJogo();
   const navigate = useNavigate();
+  const [podeAgir, setPodeAgir] = useState(false);
 
-  //TODO: preciso ainda utilizar
-  const jogadorAtual = jogo?.jogadores.find(j => j.uid === user?.uid);
+  useEffect(() => {
+    setPodeAgir(jogo?.jogadorAtualId === user?.uid);
+  }, [jogo, user?.uid]);
+  // const podeAgir = jogo?.jogadorAtualId === user?.uid;
 
-  const podeAgir = jogo?.jogadorAtualId === user?.uid;
+  const handleAcao = async (
+    acao: Acao,
+    jogadorDoTurno: string,
+    influencia?: Influencia,
+    alvoId?: string
+  ) => {
+    try {
+      if (!jogo || !podeAgir) return;
 
-  const handleAcao = async (acao: Acao) => {
-    if (!jogo || !podeAgir) return;
+      const jDT = jogo.jogadores.find(
+        (jogador) => jogador.uid === jogadorDoTurno
+      );
+      // Executa a ação e obtém as mudanças
+      const mudancas = executarAcao(jogo, acao, jDT!, alvoId, influencia);
 
-    // Lógica de execução de ação
-    const novoEstado:Jogo = { 
-      ...jogo, 
-      fase: "desafiando" 
-    };
-    await atualizarJogo(novoEstado);
+      // Combina os estados diretamente
+      const novoEstado: Jogo = {
+        ...jogo,
+        ...mudancas,
+        // Garante que arrays sejam atualizados corretamente
+        jogadores: mudancas.jogadores || jogo.jogadores,
+        historico: mudancas.historico || jogo.historico,
+      };
+
+      await atualizarJogo(novoEstado);
+
+      // Finaliza turno automaticamente se necessário
+      if (mudancas.fase === "finalizandoTurno") {
+        const mudancasTurno = finalizarTurno(novoEstado);
+        await atualizarJogo({ ...novoEstado, ...mudancasTurno });
+      }
+    } catch (error) {
+      console.error("Erro na ação:", error);
+      alert(error instanceof Error ? error.message : "Erro desconhecido");
+    }
   };
 
   const handleSairJogo = async () => {
@@ -60,59 +89,129 @@ export default function JogoScreen() {
       <h1>Jogo em andamento</h1>
       {/* Ações */}
       <div>
-        {podeAgir && jogo.fase === 'escolhendoAcao' && (
-          <div className="acoes">
-            <button onClick={() => handleAcao('Renda')}>Receber Renda ($1)</button>
-            <button onClick={() => handleAcao('Ajuda externa')}>Pedir Ajuda Externa ($2)</button>
-            {/* Adicionar outras ações */}
-          </div>
-        )}
+        <button
+          onClick={() => handleAcao("Golpe de Estado", user!.uid)}
+          disabled={!podeAgir}
+        >
+          Golpe de Estado (Custo $7)
+        </button>
+        <button
+          onClick={() => handleAcao("Renda", user!.uid)}
+          disabled={!podeAgir}
+        >
+          Renda (+ $1)
+        </button>
+        <button
+          onClick={() => handleAcao("Ajuda externa", user!.uid)}
+          disabled={!podeAgir}
+        >
+          Ajuda Externa (+ $2)
+        </button>
       </div>
 
       {/* Tabuleiro -> Jogadores + Baralho */}
-      <div style={{width:"100%", display:"flex", justifyContent:"center"}}>
-        <Tabuleiro jogo={jogo}/>
+      <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+        <Tabuleiro jogo={jogo} />
       </div>
 
       {/* Histórico */}
       <div className="historico">
-          <h3>Histórico</h3>
-          {jogo.historico.map((entry, index) => (
-            <p key={index}>{entry}</p>
-          ))}
-        </div>
-
-        <button onClick={() => handleLerRegras()}>Ler Regras</button>
-        <br />
-        <button onClick={() => handleSairJogo()}>Sair do jogo</button>
+        <h3>Histórico</h3>
+        {jogo.historico.map((entry, index) => (
+          <p key={index}>{entry}</p>
+        ))}
       </div>
+
+      <button onClick={() => handleLerRegras()}>Ler Regras</button>
+      <br />
+      <button onClick={() => handleSairJogo()}>Sair do jogo</button>
+    </div>
   );
 }
 
-const Tabuleiro = ({jogo}: {jogo: Jogo}) => (
-  <div className="tabuleiro" style={{position: "relative", width: "600px", height: "600px", border: "2px solid black", borderRadius: "50%"}}>
-    <div className="jogadores" style={{position: "relative", width: "100%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center", left:"-50%"}}>
-      {jogo.jogadores.map((jogador,index) => (
-              <JogadorInfo 
-                key={jogador.uid}
-                jogador={jogador}
-                eAtual={jogador.uid === jogo.jogadorAtualId}
-                qtdJogadores={jogo.jogadores.length}
-                index={index}
-              />
-            ))}
+const Tabuleiro = ({ jogo }: { jogo: Jogo }) => (
+  <div
+    className="tabuleiro"
+    style={{
+      position: "relative",
+      width: "600px",
+      height: "600px",
+      border: "2px solid black",
+      borderRadius: "50%",
+    }}
+  >
+    <div
+      className="jogadores"
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        left: "-50%",
+      }}
+    >
+      {jogo.jogadores.map((jogador, index) => (
+        <JogadorInfo
+          key={jogador.uid}
+          jogador={jogador}
+          eAtual={jogador.uid === jogo.jogadorAtualId}
+          qtdJogadores={jogo.jogadores.length}
+          index={index}
+        />
+      ))}
     </div>
-    <div className="baralho" style={{position: "absolute", display:"flex", justifyContent:"center", alignItems:"center", border:"2px solid red", top: "50%", left:"50%", transform:"translateX(-50%) translateY(-50%)"}}>
+    <div
+      className="baralho"
+      style={{
+        position: "absolute",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        border: "2px solid red",
+        top: "50%",
+        left: "50%",
+        transform: "translateX(-50%) translateY(-50%)",
+      }}
+    >
       {/* jogo.baralho */}
       <p>baralho</p>
     </div>
   </div>
 );
 
-const JogadorInfo = ({ jogador, eAtual, qtdJogadores, index }: { jogador: JogadorInGame; eAtual: boolean; qtdJogadores: number; index: number }) => (
-  <div className={`jogador ${eAtual ? 'ativo' : ''}`} style={{position:"absolute", width:"100px", height:"100px", border:"2px solid blue", transform:`rotate(calc((360deg / ${qtdJogadores}) * ${index}))`, transformOrigin:"340px"}}>
-    <div style={{position:"absolute", transform:`rotate(calc((-360deg / ${qtdJogadores}) * ${index}))`}}>
-      <h4>{jogador.nome} {eAtual && '(Seu turno)'}</h4>
+const JogadorInfo = ({
+  jogador,
+  eAtual,
+  qtdJogadores,
+  index,
+}: {
+  jogador: JogadorInGame;
+  eAtual: boolean;
+  qtdJogadores: number;
+  index: number;
+}) => (
+  <div
+    className={`jogador ${eAtual ? "ativo" : ""}`}
+    style={{
+      position: "absolute",
+      width: "100px",
+      height: "100px",
+      border: "2px solid blue",
+      transform: `rotate(calc((360deg / ${qtdJogadores}) * ${index}))`,
+      transformOrigin: "340px",
+    }}
+  >
+    <div
+      style={{
+        position: "absolute",
+        transform: `rotate(calc((-360deg / ${qtdJogadores}) * ${index}))`,
+      }}
+    >
+      <h4>
+        {jogador.nome} {eAtual && "(Seu turno)"}
+      </h4>
       <p>${jogador.dinheiro}</p>
       <div className="influencias">
         {jogador.influencias.map((inf, i) => (
@@ -124,7 +223,7 @@ const JogadorInfo = ({ jogador, eAtual, qtdJogadores, index }: { jogador: Jogado
 );
 
 const CartaComponente = ({ influence }: { influence: Influencia }) => (
-  <div className={`carta ${influence.revelada ? 'revelada' : ''}`}>
-    {influence.revelada ? influence.carta.nome : 'Carta Ocultada'}
+  <div className={`carta ${influence.revelada ? "revelada" : ""}`}>
+    {influence.revelada ? influence.carta.nome : "Carta Ocultada"}
   </div>
 );
